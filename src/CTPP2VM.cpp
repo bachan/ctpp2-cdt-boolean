@@ -2125,6 +2125,7 @@ fprintf(stderr, "0x%08X REPLIND   ", iIP);
 										CDT::eValType typ = oVMArgStack.GetTopElement(aCode[iIP].argument).GetType();
 										switch (typ)
 										{
+										case CDT::BOOL_VAL:
 										case CDT::INT_VAL:
 										case CDT::REAL_VAL:
 #ifdef _DEBUG
@@ -2156,6 +2157,7 @@ HL_RST;
 										CDT::eValType typ = oRegs[iSrcReg].GetType();
 										switch (typ)
 										{
+										case CDT::BOOL_VAL:
 										case CDT::INT_VAL:
 										case CDT::REAL_VAL:
 #ifdef _DEBUG

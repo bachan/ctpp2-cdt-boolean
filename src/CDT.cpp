@@ -349,6 +349,7 @@ CDT::CDT(const eValType & oValue): eValueType(oValue)
 		case UNDEF:
 			break;
 
+		case BOOL_VAL:
 		case INT_VAL:
 			u.i_data = 0;
 			break;
@@ -410,6 +411,7 @@ CDT::CDT(const CDT & oCDT)
 		case UNDEF:
 			break;
 
+		case BOOL_VAL:
 		case INT_VAL:
 			u.i_data = oCDT.u.i_data;
 			break;
@@ -479,6 +481,7 @@ CDT & CDT::operator=(const CDT & oCDT)
 		case UNDEF:
 			break;
 
+		case BOOL_VAL:
 		case INT_VAL:
 			u.i_data = iIntVal;
 			break;
@@ -508,6 +511,11 @@ return *this;
 }
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//
+// Type cast constructor from bool type
+//
+CDT::CDT(const bool  oValue): eValueType(BOOL_VAL)         { u.i_data = oValue; }
 
 //
 // Type cast constructor from INT_64 type
@@ -558,6 +566,20 @@ CDT::CDT(CCHAR_P oValue): eValueType(STRING_VAL)
 CDT::CDT(void * oValue): eValueType(POINTER_VAL) { u.pp_data = oValue; }
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//
+// Operator = for type bool
+//
+CDT & CDT::operator=(const bool  oValue)
+{
+	// Destroy object if need
+	if (eValueType >= STRING_VAL) { Destroy(); }
+
+	eValueType = BOOL_VAL;
+	u.i_data   = oValue;
+
+return *this;
+}
 
 //
 // Operator = for type INT_64
@@ -791,6 +813,11 @@ return true;
 //
 // Push value into array
 //
+void CDT::PushBack(const bool  oValue)          { PushBack(CDT(oValue)); }
+
+//
+// Push value into array
+//
 void CDT::PushBack(const INT_64  oValue)        { PushBack(CDT(oValue)); }
 
 //
@@ -850,6 +877,7 @@ bool CDT::Nonzero() const
 		case UNDEF:
 			break;
 
+		case BOOL_VAL:
 		case INT_VAL:
 			if (u.i_data != 0) { return true; }
 			break;
@@ -1883,7 +1911,8 @@ return *this;
 //
 bool CDT::operator==(const INT_64  oValue) const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data == oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data == oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data == oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data == oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data == oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data == oValue; }
@@ -1921,7 +1950,8 @@ bool CDT::operator==(const UINT_32  oValue) const { return operator==(UINT_64(oV
 //
 bool CDT::operator==(const W_FLOAT  oValue) const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data == oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data == oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data == oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data == oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data == oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data == oValue; }
@@ -1990,17 +2020,17 @@ bool CDT::operator==(const CDT & oCDT) const
 	{
 		return true;
 	}
-	// Integer-to-Integer
-	else if ((eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
+	// (Bool, Integer)-to-(Bool, Integer)
+	else if ((eValueType      == BOOL_VAL || eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == BOOL_VAL || oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
 		return GetInt() == oCDT.GetInt();
 	}
-	// (Integer, Real, String+Integer, String+Real)-to-(Integer, Real, String+Integer, String+Real)
-	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL ||
-		  eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL ||
+	// (Bool, Integer, Real, String+Integer, String+Real)-to-(Bool, Integer, Real, String+Integer, String+Real)
+	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL || eValueType      == BOOL_VAL ||
+	          eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == BOOL_VAL ||
 	          oCDT.eValueType == INT_VAL  || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
@@ -2008,7 +2038,7 @@ bool CDT::operator==(const CDT & oCDT) const
 	}
 	// (String, String+Integer, String+Real)-to-(String, String+Integer, String+Real)
 	else if ((eValueType      == STRING_VAL || eValueType      == STRING_REAL_VAL || eValueType      == STRING_INT_VAL) &&
-		 (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
+	         (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
 	{
 		return *(u.p_data -> u.s_data) == *(oCDT.u.p_data -> u.s_data);
 	}
@@ -2235,7 +2265,8 @@ return false;
 //
 bool CDT::operator>(const INT_64  oValue)  const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data > oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data > oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data > oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data > oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data > oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data > oValue; }
@@ -2272,7 +2303,8 @@ bool CDT::operator>(const UINT_32  oValue) const { return operator>(UINT_64(oVal
 //
 bool CDT::operator>(const W_FLOAT  oValue) const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data > oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data > oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data > oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data > oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data > oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data > oValue; }
@@ -2340,17 +2372,17 @@ bool CDT::operator>(const CDT & oCDT) const
 	{
 		return false;
 	}
-	// Integer-to-Integer
-	else if ((eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
+	// (Bool, Integer)-to-(Bool, Integer)
+	else if ((eValueType      == BOOL_VAL || eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == BOOL_VAL || oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
 		return GetInt() > oCDT.GetInt();
 	}
-	// (Integer, Real, String+Integer, String+Real)-to-(Integer, Real, String+Integer, String+Real)
-	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL ||
-		  eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL ||
+	// (Bool, Integer, Real, String+Integer, String+Real)-to-(Bool, Integer, Real, String+Integer, String+Real)
+	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL || eValueType      == BOOL_VAL ||
+	          eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == BOOL_VAL ||
 	          oCDT.eValueType == INT_VAL  || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
@@ -2388,7 +2420,8 @@ return false;
 //
 bool CDT::operator<(const INT_64  oValue) const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data < oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data < oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data < oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data < oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data < oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data < oValue; }
@@ -2425,7 +2458,8 @@ bool CDT::operator<(const UINT_32  oValue) const { return operator<(UINT_64(oVal
 //
 bool CDT::operator<(const W_FLOAT  oValue) const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data < oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data < oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data < oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data < oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data < oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data < oValue; }
@@ -2493,17 +2527,17 @@ bool CDT::operator<(const CDT & oCDT) const
 	{
 		return false;
 	}
-	// Integer-to-Integer
-	else if ((eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
+	// (Bool, Integer)-to-(Bool, Integer)
+	else if ((eValueType      == BOOL_VAL || eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == BOOL_VAL || oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
 		return GetInt() < oCDT.GetInt();
 	}
-	// (Integer, Real, String+Integer, String+Real)-to-(Integer, Real, String+Integer, String+Real)
-	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL ||
-		  eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL ||
+	// (Bool, Integer, Real, String+Integer, String+Real)-to-(Bool, Integer, Real, String+Integer, String+Real)
+	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL || eValueType      == BOOL_VAL ||
+	          eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == BOOL_VAL ||
 	          oCDT.eValueType == INT_VAL  || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
@@ -2511,7 +2545,7 @@ bool CDT::operator<(const CDT & oCDT) const
 	}
 	// (String, String+Integer, String+Real)-to-(String, String+Integer, String+Real)
 	else if ((eValueType      == STRING_VAL || eValueType      == STRING_REAL_VAL || eValueType      == STRING_INT_VAL) &&
-		 (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
+	         (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
 	{
 		return *(u.p_data -> u.s_data) < *(oCDT.u.p_data -> u.s_data);
 	}
@@ -2541,7 +2575,8 @@ return false;
 //
 bool CDT::operator<=(const INT_64  oValue)  const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data <= oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data <= oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data <= oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data <= oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data <= oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data <= oValue; }
@@ -2578,7 +2613,8 @@ bool CDT::operator<=(const UINT_32  oValue) const { return operator<=(UINT_64(oV
 //
 bool CDT::operator<=(const W_FLOAT  oValue) const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data <= oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data <= oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data <= oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data <= oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data <= oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data <= oValue; }
@@ -2646,17 +2682,17 @@ bool CDT::operator<=(const CDT & oCDT) const
 	{
 		return true;
 	}
-	// Integer-to-Integer
-	else if ((eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
+	// (Bool, Integer)-to-(Bool, Integer)
+	else if ((eValueType      == BOOL_VAL || eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == BOOL_VAL || oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
 		return GetInt() <= oCDT.GetInt();
 	}
-	// (Integer, Real, String+Integer, String+Real)-to-(Integer, Real, String+Integer, String+Real)
-	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL ||
-		  eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL ||
+	// (Bool, Integer, Real, String+Integer, String+Real)-to-(Bool, Integer, Real, String+Integer, String+Real)
+	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL || eValueType      == BOOL_VAL ||
+	          eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == BOOL_VAL ||
 	          oCDT.eValueType == INT_VAL  || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
@@ -2664,7 +2700,7 @@ bool CDT::operator<=(const CDT & oCDT) const
 	}
 	// (String, String+Integer, String+Real)-to-(String, String+Integer, String+Real)
 	else if ((eValueType      == STRING_VAL || eValueType      == STRING_REAL_VAL || eValueType      == STRING_INT_VAL) &&
-		 (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
+	         (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
 	{
 		return *(u.p_data -> u.s_data) <= *(oCDT.u.p_data -> u.s_data);
 	}
@@ -2694,7 +2730,8 @@ return false;
 //
 bool CDT::operator>=(const INT_64  oValue)  const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data >= oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data >= oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data >= oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data >= oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data >= oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data >= oValue; }
@@ -2731,7 +2768,8 @@ bool CDT::operator>=(const UINT_32  oValue) const { return operator>=(UINT_64(oV
 //
 bool CDT::operator>=(const W_FLOAT  oValue) const
 {
-	if      (eValueType == INT_VAL)         { return u.i_data >= oValue;              }
+	if      (eValueType == BOOL_VAL)        { return u.i_data >= oValue;              }
+	else if (eValueType == INT_VAL)         { return u.i_data >= oValue;              }
 	else if (eValueType == REAL_VAL)        { return u.d_data >= oValue;              }
 	else if (eValueType == STRING_INT_VAL)  { return u.p_data -> uc.i_data >= oValue; }
 	else if (eValueType == STRING_REAL_VAL) { return u.p_data -> uc.d_data >= oValue; }
@@ -2799,17 +2837,17 @@ bool CDT::operator>=(const CDT & oCDT) const
 	{
 		return true;
 	}
-	// Integer-to-Integer
-	else if ((eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
+	// (Bool, Integer)-to-(Bool, Integer)
+	else if ((eValueType      == BOOL_VAL || eValueType      == INT_VAL || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == BOOL_VAL || oCDT.eValueType == INT_VAL || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
 		return GetInt() >= oCDT.GetInt();
 	}
-	// (Integer, Real, String+Integer, String+Real)-to-(Integer, Real, String+Integer, String+Real)
-	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL ||
-		  eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
-	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL ||
+	// (Bool, Integer, Real, String+Integer, String+Real)-to-(Bool, Integer, Real, String+Integer, String+Real)
+	else if ((eValueType      == REAL_VAL || eValueType      == STRING_REAL_VAL || eValueType      == BOOL_VAL ||
+	          eValueType      == INT_VAL  || eValueType      == STRING_INT_VAL) &&
+	         (oCDT.eValueType == REAL_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == BOOL_VAL ||
 	          oCDT.eValueType == INT_VAL  || oCDT.eValueType == STRING_INT_VAL)
 		)
 	{
@@ -2817,7 +2855,7 @@ bool CDT::operator>=(const CDT & oCDT) const
 	}
 	// (String, String+Integer, String+Real)-to-(String, String+Integer, String+Real)
 	else if ((eValueType      == STRING_VAL || eValueType      == STRING_REAL_VAL || eValueType      == STRING_INT_VAL) &&
-		 (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
+	         (oCDT.eValueType == STRING_VAL || oCDT.eValueType == STRING_REAL_VAL || oCDT.eValueType == STRING_INT_VAL))
 	{
 		return *(u.p_data -> u.s_data) >= *(oCDT.u.p_data -> u.s_data);
 	}
@@ -2848,6 +2886,7 @@ bool CDT::Equal(const INT_64  oValue) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -2888,6 +2927,7 @@ bool CDT::Equal(const W_FLOAT  oValue) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -2923,6 +2963,7 @@ bool CDT::Equal(const CDT & oCDT) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -2932,6 +2973,7 @@ bool CDT::Equal(const CDT & oCDT) const
 				switch(oCDT.eValueType)
 				{
 					case UNDEF:
+					case BOOL_VAL:
 					case INT_VAL:
 					case REAL_VAL:
 					case POINTER_VAL:
@@ -3014,6 +3056,7 @@ bool CDT::Greater(const INT_64  oValue) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -3054,6 +3097,7 @@ bool CDT::Greater(const W_FLOAT  oValue) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -3089,6 +3133,7 @@ bool CDT::Greater(const CDT & oCDT) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -3098,6 +3143,7 @@ bool CDT::Greater(const CDT & oCDT) const
 				switch(oCDT.eValueType)
 				{
 					case UNDEF:
+					case BOOL_VAL:
 					case INT_VAL:
 					case REAL_VAL:
 					case POINTER_VAL:
@@ -3140,6 +3186,7 @@ bool CDT::Less(const INT_64  oValue) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -3180,6 +3227,7 @@ bool CDT::Less(const W_FLOAT  oValue) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -3215,6 +3263,7 @@ bool CDT::Less(const CDT & oCDT) const
 	switch(eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -3224,6 +3273,7 @@ bool CDT::Less(const CDT & oCDT) const
 				switch(oCDT.eValueType)
 				{
 					case UNDEF:
+					case BOOL_VAL:
 					case INT_VAL:
 					case REAL_VAL:
 					case POINTER_VAL:
@@ -3546,7 +3596,8 @@ CDT & CDT::Concat(const STLW::string & oValue)
 	{
 		(*this) = CDT(STLW::string(oValue));
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(GetString() + oValue);
@@ -3585,6 +3636,38 @@ CDT & CDT::Append(const STLW::string & oValue) { return Concat(oValue); }
 CDT & CDT::Append(CCHAR_P szData, const INT_32 iDataLength)  { return Concat(szData, iDataLength); }
 
 //
+// Append a bool to CDT
+//
+CDT & CDT::Append(const bool  oValue)
+{
+	CCHAR_P toAppend = oValue ? "true" : "false";
+
+	if (eValueType == UNDEF)
+	{
+		(*this) = CDT(toAppend);
+	}
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
+	         eValueType == REAL_VAL)
+	{
+		STLW::string sTMP(GetString());
+		sTMP.append(toAppend);
+
+		(*this) = CDT(sTMP);
+	}
+	else if (eValueType == STRING_VAL     ||
+	         eValueType == STRING_INT_VAL ||
+	         eValueType == STRING_REAL_VAL)
+	{
+		Unshare();
+		u.p_data -> u.s_data -> append(toAppend);
+	}
+	else { throw CDTTypeCastException("Append"); }
+
+return *this;
+}
+
+//
 // Append a INT_64 to CDT
 //
 CDT & CDT::Append(const INT_64  oValue)
@@ -3596,7 +3679,8 @@ CDT & CDT::Append(const INT_64  oValue)
 	{
 		(*this) = CDT(STLW::string(szBuf, iLen));
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(GetString());
@@ -3643,7 +3727,8 @@ CDT & CDT::Append(const W_FLOAT  oValue)
 	{
 		(*this) = CDT(STLW::string(szBuf, iLen));
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(GetString());
@@ -3672,7 +3757,8 @@ CDT & CDT::Append(const CDT & oCDT)
 	{
 		(*this) = CDT(STLW::string(oCDT.GetString()));
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(GetString() + oCDT.GetString());
@@ -3709,7 +3795,8 @@ CDT & CDT::Prepend(const STLW::string & oValue)
 	{
 		(*this) = CDT(STLW::string(oValue));
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(oValue + GetString());
@@ -3732,6 +3819,38 @@ return *this;
 //
 // Prepend a string to CDT
 //
+CDT & CDT::Prepend(const bool  oValue)
+{
+	CCHAR_P toPrepend = oValue ? "true" : "false";
+
+	if (eValueType == UNDEF)
+	{
+		(*this) = CDT(toPrepend);
+	}
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
+	         eValueType == REAL_VAL)
+	{
+		STLW::string sTMP(STLW::string(toPrepend).append(GetString()));
+		(*this) = CDT(sTMP);
+	}
+	else if (eValueType == STRING_VAL     ||
+	         eValueType == STRING_INT_VAL ||
+	         eValueType == STRING_REAL_VAL)
+	{
+		Unshare();
+		STLW::string sTMP(toPrepend);
+		sTMP.append(*(u.p_data -> u.s_data));
+		u.p_data -> u.s_data -> assign(sTMP);
+	}
+	else { throw CDTTypeCastException("Prepend"); }
+
+return *this;
+}
+
+//
+// Prepend a string to CDT
+//
 CDT & CDT::Prepend(const INT_64  oValue)
 {
 	CHAR_8 szBuf[C_MAX_SPRINTF_LENGTH + 1];
@@ -3741,7 +3860,8 @@ CDT & CDT::Prepend(const INT_64  oValue)
 	{
 		(*this) = CDT(STLW::string(szBuf, iLen));
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(STLW::string(szBuf, iLen).append(GetString()));
@@ -3787,7 +3907,8 @@ CDT & CDT::Prepend(const W_FLOAT  oValue)
 	{
 		(*this) = CDT(STLW::string(szBuf, iLen));
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(STLW::string(szBuf, iLen).append(GetString()));
@@ -3816,7 +3937,8 @@ CDT & CDT::Prepend(const CDT & oCDT)
 	{
 		(*this) = CDT(oCDT.GetString());
 	}
-	else if (eValueType == INT_VAL ||
+	else if (eValueType == BOOL_VAL ||
+	         eValueType == INT_VAL  ||
 	         eValueType == REAL_VAL)
 	{
 		STLW::string sTMP(oCDT.GetString() + GetString());
@@ -3837,12 +3959,50 @@ return *this;
 }
 
 //
+// Get value as bool
+//
+bool CDT::GetBool() const
+{
+	switch (eValueType)
+	{
+		case BOOL_VAL:
+		case INT_VAL:
+			return u.i_data != 0;
+
+		case REAL_VAL:
+			return u.d_data != 0.0;
+
+		case STRING_VAL:
+			{
+				INT_64   iData1;
+				W_FLOAT  dData1;
+				if (CastToNumber(iData1, dData1) == REAL_VAL) { return dData1 != 0.0; }
+
+				return iData1 != 0;
+			}
+
+		case STRING_INT_VAL:
+			return u.p_data -> uc.i_data != 0;
+
+		case STRING_REAL_VAL:
+			return u.p_data -> uc.d_data != 0.0;
+
+		case POINTER_VAL:
+			return (INT_64)(u.pp_data) != 0;
+
+		default:
+			return false;
+	}
+}
+
+//
 // Get value as W_FLOAT
 //
 W_FLOAT CDT::GetFloat() const
 {
 	switch (eValueType)
 	{
+		case BOOL_VAL:
 		case INT_VAL:
 			return W_FLOAT(u.i_data);
 
@@ -3879,6 +4039,7 @@ INT_64 CDT::GetInt() const
 {
 	switch (eValueType)
 	{
+		case BOOL_VAL:
 		case INT_VAL:
 			return u.i_data;
 
@@ -3915,6 +4076,7 @@ UINT_64 CDT::GetUInt() const
 {
 	switch (eValueType)
 	{
+		case BOOL_VAL:
 		case INT_VAL:
 			return u.i_data;
 
@@ -3981,6 +4143,9 @@ STLW::string CDT::GetString(CCHAR_P szFormat) const
 {
 	switch (eValueType)
 	{
+		case BOOL_VAL:
+			return u.i_data ? "true" : "false";
+
 		case INT_VAL:
 			{
 				CHAR_8 szBuf[C_MAX_SPRINTF_LENGTH + 1];
@@ -4097,6 +4262,7 @@ void CDT::DumpData(UINT_32 iLevel, UINT_32 iOffset, const CDT & oData, STLW::str
 	switch (oData.GetType())
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case STRING_INT_VAL:
@@ -4199,6 +4365,7 @@ CCHAR_P CDT::PrintableType(eValType eType)
 	switch(eType)
 	{
 		case UNDEF:           return "*UNDEF*";
+		case BOOL_VAL:        return "BOOL";
 		case INT_VAL:         return "INTEGER";
 		case REAL_VAL:        return "REAL";
 		case STRING_VAL:      return "STRING";
@@ -4221,6 +4388,7 @@ UINT_32 CDT::Size() const
 	switch (eValueType)
 	{
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -4554,6 +4722,7 @@ void CDT::Destroy() throw()
 	{
 		// POD types
 		case UNDEF:
+		case BOOL_VAL:
 		case INT_VAL:
 		case REAL_VAL:
 		case POINTER_VAL:
@@ -4635,6 +4804,10 @@ CDT::eValType CDT::CastToNumber(INT_64 & iData, W_FLOAT & dData) const
 	{
 		case UNDEF:
 			return INT_VAL;
+
+		case BOOL_VAL:
+			iData = u.i_data;
+			return BOOL_VAL;
 
 		case INT_VAL:
 			iData = u.i_data;

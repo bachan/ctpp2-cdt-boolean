@@ -29,6 +29,9 @@
  *
  * $CTPP$
  */
+#ifndef _CTPP2_UTIL_HPP__
+#define _CTPP2_UTIL_HPP__ 1
+
 #include "CTPP2Types.h"
 
 #include "STLString.hpp"
@@ -240,3 +243,5 @@ CTPP2DECL INT_32 UnicodeToUTF8(UINT_32 iUCS, UCHAR_P sUTF8);
 
 } // namespace CTPP
 // End.
+
+#endif /* _CTPP2_UTIL_HPP__ */

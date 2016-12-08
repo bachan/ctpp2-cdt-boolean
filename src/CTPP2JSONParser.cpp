@@ -578,8 +578,8 @@ CCharIterator CTPP2JSONParser::IsValue(CCharIterator szData, CCharIterator szEnd
 					if (sTMP != NULL)
 					{
 						if      (strcasecmp("null",  sTMPBuf.c_str()) == 0) { oCurrentCDT = CDT(CDT::UNDEF); }
-						else if (strcasecmp("false", sTMPBuf.c_str()) == 0) { oCurrentCDT = 0; }
-						else if (strcasecmp("true",  sTMPBuf.c_str()) == 0) { oCurrentCDT = 1; }
+						else if (strcasecmp("false", sTMPBuf.c_str()) == 0) { oCurrentCDT = false; }
+						else if (strcasecmp("true",  sTMPBuf.c_str()) == 0) { oCurrentCDT = true; }
 						// Unexpected data found
 						else { return NULL; }
 

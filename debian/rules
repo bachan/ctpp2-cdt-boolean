@@ -33,7 +33,7 @@ DEB_UPSTREAM_TARBALL_MD5 = 1155b65e8ca8b844c631831e4a3e5644
 
 # Upstream used flags
 CXX_PARAMS = --param large-function-growth=5000 --param inline-unit-growth=600 -finline-limit=2000
-CXX_WARN_FLAGS = -Wno-long-long -Wno-inline -finline-functions
+CXX_WARN_FLAGS = -Wno-long-long -Wno-inline -finline-functions -fPIC
 CXXFLAGS += $(CXX_PARAMS) $(CXX_WARN_FLAGS)
 
 # Install files for ctpp2-utils

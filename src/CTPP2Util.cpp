@@ -415,6 +415,17 @@ STLW::string XMLEscape(const STLW::string  & sData)
 			sBuffer[iBufferPointer++] = 'p';
 			sBuffer[iBufferPointer++] = ';';
 		}
+		else if (chTMP < 0x20 && chTMP != '\n' && chTMP != '\t' && chTMP != '\r')
+		{
+			/* ignore this char */
+		}
+		else if (chTMP == 0xef && itsData + 2 < sData.end() && (UCHAR_8)(*(itsData + 1)) == 0xbf && (UCHAR_8)(*(itsData + 2)) == 0xbe)
+		{
+			++itsData;
+			++itsData;
+
+			/* and then ignore this char */
+		}
 		else
 		{
 			sBuffer[iBufferPointer++] = *itsData;
@@ -717,6 +728,7 @@ DumpBuffer & DumpCDT2JSON(const CTPP::CDT & oCDT, DumpBuffer & oResult)
 			oResult.Write("null", 4);
 			break;
 
+		case CDT::BOOL_VAL:
 		case CDT::INT_VAL:
 		case CDT::REAL_VAL:
 		case CDT::POINTER_VAL:

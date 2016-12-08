@@ -71,6 +71,7 @@ INT_32 FnJSONEscape::Handler(CDT            * aArguments,
 				sResult.append("null", 4);
 				break;
 
+			case CDT::BOOL_VAL:
 			case CDT::INT_VAL:
 			case CDT::REAL_VAL:
 			case CDT::POINTER_VAL:

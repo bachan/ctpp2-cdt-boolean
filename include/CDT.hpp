@@ -77,7 +77,8 @@ public:
 	  @enum eValType CDT.hpp <CDT.hpp>
 	  @brief Describes type of stored value
 	*/
-	enum eValType { UNDEF           = 0x01,
+	enum eValType { UNDEF           = 0x00,
+	                BOOL_VAL        = 0x01,
 	                INT_VAL         = 0x02,
 	                REAL_VAL        = 0x04,
 	                POINTER_VAL     = 0x08,
@@ -118,6 +119,12 @@ public:
 	  @return read/write referense to self
 	*/
 	CDT & operator=(const CDT & oCDT);
+
+	/**
+	  @brief Type cast constructor
+	  @param oValue - bool value
+	*/
+	CDT(const bool  oValue);
 
 	/**
 	  @brief Type cast constructor
@@ -167,6 +174,13 @@ public:
 	  @param oValue - generic pointer value
 	*/
 	CDT(void * oValue);
+
+	/**
+	  @brief Copy operator
+	  @param oValue - bool value to copy
+	  @return read/write referense to self
+	*/
+	CDT & operator=(const bool  oValue);
 
 	/**
 	  @brief Copy operator
@@ -294,6 +308,12 @@ public:
 	  @return true, if element present, false - otherwise
 	*/
 	bool Exists(const UINT_32  iPos) const;
+
+	/**
+	  @brief Push value into array
+	  @param oValue - bool value
+	*/
+	void PushBack(const bool  oValue);
 
 	/**
 	  @brief Push value into array
@@ -1477,6 +1497,14 @@ public:
 	CDT & Append(CCHAR_P szData, const INT_32 iDataLength = -1);
 
 	/**
+	  @brief Append a bool to CDT
+	  @param szData - string to append
+	  @param iDataLength - string length
+	  @return read/write referense to self
+	*/
+	CDT & Append(const bool  oValue);
+
+	/**
 	  @brief Append a INT_64 to CDT
 	  @param szData - string to append
 	  @param iDataLength - string length
@@ -1541,6 +1569,14 @@ public:
 	CDT & Prepend(CCHAR_P szData, const INT_32 iDataLength = -1);
 
 	/**
+	  @brief Prepend a bool to CDT
+	  @param szData - string to append
+	  @param iDataLength - string length
+	  @return read/write referense to self
+	*/
+	CDT & Prepend(const bool  oValue);
+
+	/**
 	  @brief Prepend a INT_64 to CDT
 	  @param szData - string to append
 	  @param iDataLength - string length
@@ -1587,6 +1623,11 @@ public:
 	  @return read/write referense to self
 	*/
 	CDT & Prepend(const CDT & oCDT);
+
+	/**
+	  @brief Get value as bool
+	*/
+	bool GetBool() const;
 
 	/**
 	  @brief Get value as W_FLOAT
