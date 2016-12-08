@@ -1,0 +1,41 @@
+Description: Remove compiler flags by upstream
+ Upstream was overwriting the hardened compile and linker flags by
+ build system. This patch removes code which was doing this overwrite
+ and these flags are moved to the rules file so this patch doesn't
+ remove any needed compile flags provided by upstream.
+Author: Vasudev Kamath <kamathvasudev@gmail.com>
+Forwarded: not-needed
+Last-Update: 2013-08-30
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -312,29 +312,6 @@
+ INCLUDE_DIRECTORIES(include)
+ INCLUDE_DIRECTORIES(include/functions)
+ 
+-IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
+-
+-    SET(CMAKE_CXX_PARAMS      " --param large-function-growth=5000 --param inline-unit-growth=600 -finline-limit=2000 ")
+-
+-    SET(CMAKE_CXX_WARN_FLAGS  " -Wall -pedantic -Wno-long-long -Wno-inline -finline-functions ")
+-
+-    IF(ENABLE_OPTIMIZATION MATCHES "ON")
+-        SET(CMAKE_CXX_FLAGS "${CXX_FLAGS} ${CMAKE_CXX_WARN_FLAGS} ${CMAKE_CXX_PARAMS} -O3 ")
+-
+-        IF (NOT "${CPU_TUNE}" STREQUAL "")
+-            SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -mtune=${CPU_TUNE} ")
+-        ENDIF (NOT "${CPU_TUNE}" STREQUAL "")
+-
+-    ELSE(ENABLE_OPTIMIZATION MATCHES "OFF")
+-        SET(CMAKE_CXX_FLAGS "${CXX_FLAGS} ${CMAKE_CXX_WARN_FLAGS} ${CMAKE_CXX_PARAMS} ")
+-    ENDIF(ENABLE_OPTIMIZATION MATCHES "ON")
+-
+-    IF(DEBUG_MODE MATCHES "ON")
+-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ")
+-        SET(CMAKE_CXX_WARN_FLAGS  "${CMAKE_CXX_WARN_FLAGS} -fprofile-arcs -ftest-coverage ")
+-    ENDIF(DEBUG_MODE MATCHES "ON")
+-
+-ENDIF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
+ 
+ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+     ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)

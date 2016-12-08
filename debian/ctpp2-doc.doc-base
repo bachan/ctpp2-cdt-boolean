@@ -1,0 +1,9 @@
+Document: ctpp2
+Title: CTPP Template Engine API manual
+Author: Andrei V. Shetukhin
+Abstract: This manual describes APIs given by libctpp2-2
+Section: Programming/C++
+
+Format: HTML
+Index: /usr/share/doc/ctpp2-doc/html/index.xhtml
+Files: /usr/share/doc/ctpp2-doc/html/*.xhtml

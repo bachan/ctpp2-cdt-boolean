@@ -1,0 +1,49 @@
+Description: Add type support for kFreeBSD and Hurd
+ This patch allows compilation of ctpp2 on Hurd and kFreeBSD platforms
+ by adding __GLIBC__ check at proper places.
+Author: Pino Toscano
+Last-Updated: 2013-08-31
+Bug-Debian: http://bugs.debian.org/721367
+
+--- a/include/CTPP2SysTypes.h
++++ b/include/CTPP2SysTypes.h
+@@ -41,7 +41,7 @@
+ #include <sys/types.h>
+ #include <stdint.h>
+ 
+-#if defined(__linux__) || defined(linux) || defined(CYGWIN) || defined(__CYGWIN__)
++#if defined(__linux__) || defined(linux) || defined(CYGWIN) || defined(__CYGWIN__) || defined(__GLIBC__)
+ 
+ /**
+   @var typedef __int16_t    INT_16
+@@ -134,7 +134,7 @@
+ typedef UCCHAR_8                  * UCCHAR_P;
+ 
+ 
+-#elif defined(__FreeBSD__) || defined(__APPLE__) /* Linux End, start of FreeBSD / Mac OS declarations */
++#elif defined(__FreeBSD__) || defined(__APPLE__) || defined(__GLIBC__) /* Linux End, start of FreeBSD / Mac OS declarations */
+ 
+ /**
+   @var typedef int16_t    INT_16
+--- a/src/CTPP2StringIconvOutputCollector.cpp
++++ b/src/CTPP2StringIconvOutputCollector.cpp
+@@ -85,7 +85,7 @@
+ 	size_t iDstLength     = CTPP_ESCAPE_BUFFER_LEN;
+ 
+ 	char         aDstData[CTPP_ESCAPE_BUFFER_LEN];
+-#if defined(linux) || defined(__APPLE__)
++#if defined(linux) || defined(__APPLE__) || defined(__GLIBC__)
+ 	char       * aSrcData = (char *)vData;
+ #else
+ 	const char * aSrcData = (const char *)vData;
+--- a/src/functions/FnIconv.cpp
++++ b/src/functions/FnIconv.cpp
+@@ -173,7 +173,7 @@
+ 	size_t iDstLength     = CTPP_ESCAPE_BUFFER_LEN;
+ 
+ 	char         aDstData[CTPP_ESCAPE_BUFFER_LEN];
+-#if defined(linux) || defined(__APPLE__)
++#if defined(linux) || defined(__APPLE__) || defined(__GLIBC__)
+ 	char       * aSrcData = (char *)sWhat.data();
+ #else
+ 	const char * aSrcData = (const char *)sWhat.data();

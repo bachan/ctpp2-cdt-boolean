@@ -1,0 +1,27 @@
+Description: Fix FTBFS on kFreeBSD and Hurd
+ This patch disables iconv check on kFreeBSD and Hurd system as iconv
+ is alread included in standrd C library.
+Author: Vasudev Kamath<kamathvasudev@gmail.com>
+Last-Update: 2013-04-21
+Bug-Debian: http://bugs.debian.org/705134
+Forwarded: no
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -194,6 +194,16 @@
+     MESSAGE(STATUS "#### Building for HP-UX...")
+ ENDIF("${CMAKE_SYSTEM_NAME}" MATCHES "HP-UX")
+ 
++IF("${CMAKE_SYSTEM_NAME}" MATCHES "kFreeBSD")
++  SET(SKIP_ICONV_LIRARY "ON")
++  MESSAGE(STATUS "### Building for GNU/kFreeBSD...")
++ENDIF("${CMAKE_SYSTEM_NAME}" MATCHES "kFreeBSD")
++
++IF("${CMAKE_SYSTEM_NAME}" MATCHES "GNU")
++  SET(SKIP_ICONV_LIRARY "ON")
++  MESSAGE(STATUS "### Building for Hurd...")
++ENDIF("${CMAKE_SYSTEM_NAME}" MATCHES "GNU")
++
+ SET(MD5_WITHOUT_OPENSSL "")
+ #
+ # MD5 library support

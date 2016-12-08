@@ -1,0 +1,21 @@
+Description: Remove reference to non-existent files
+ Doxyfile was refering to non-existent template files under
+ doc/ this patches removes the reference to those files.
+ .
+Author: Vasudev Kamath <kamathvasudev@gmail.com>
+Forwarded: no
+Last-Update: 2013-01-22
+
+--- a/Doxyfile
++++ b/Doxyfile
+@@ -91,8 +91,8 @@
+ GENERATE_HTML          = YES
+ HTML_OUTPUT            = html
+ HTML_FILE_EXTENSION    = .html
+-HTML_HEADER            = ./doc/doxytmpl/header.html
+-HTML_FOOTER            = ./doc/doxytmpl/footer.html
++HTML_HEADER            =
++HTML_FOOTER            =
+ HTML_STYLESHEET        =
+ HTML_ALIGN_MEMBERS     = YES
+ GENERATE_HTMLHELP      = NO

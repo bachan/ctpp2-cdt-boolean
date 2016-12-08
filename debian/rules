@@ -1,0 +1,95 @@
+#!/usr/bin/make -f
+
+
+debian/control:: debian/control.in
+DEB_PHONY_RULES += debian/control.in
+debian/control.in::
+	sed -e 's/__LIBPKGNAME__/$(libpkgname)/g' <debian/control.in.in >debian/control.in
+
+include /usr/share/cdbs/1/rules/upstream-tarball.mk
+include /usr/share/pkg-kde-tools/makefiles/1/cdbs/symbolshelper.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/utils.mk
+include /usr/share/cdbs/1/class/cmake.mk
+
+stem = ctpp2
+major = $(firstword $(subst .,$(space), $(DEB_UPSTREAM_VERSION)))
+libname = lib$(stem)
+libpkgname = lib$(stem)-$(major)v5
+devpkgname = lib$(stem)-dev
+docpkgname = $(stem)-doc
+utilspkg = $(stem)-utils
+
+# Build Dependencies
+# * recent d-shlibs needed for --v5 option
+CDBS_BUILD_DEPENDS += , cmake, d-shlibs(>=0.61), graphviz, pkg-kde-tools
+
+# Multiarch quirks
+CDBS_PREDEPENDS = $(if $(DEB_HOST_MULTIARCH),multiarch-support)
+
+# Handle Upstream releases
+DEB_UPSTREAM_URL = http://ctpp.havoc.ru/download/
+DEB_UPSTREAM_TARBALL_MD5 = 1155b65e8ca8b844c631831e4a3e5644
+
+# Upstream used flags
+CXX_PARAMS = --param large-function-growth=5000 --param inline-unit-growth=600 -finline-limit=2000
+CXX_WARN_FLAGS = -Wno-long-long -Wno-inline -finline-functions
+CXXFLAGS += $(CXX_PARAMS) $(CXX_WARN_FLAGS)
+
+# Install files for ctpp2-utils
+DEB_DH_INSTALL_ARGS_$(utilspkg) = usr/bin/*
+DEB_INSTALL_MANPAGES_$(utilspkg) = debian/tmp/usr/man/man1/*
+
+# Install documentation
+DEB_INSTALL_DOCS_$(stem)-doc += doc/html
+
+# use standard LDFLAGS
+DEB_CMAKE_NORMAL_ARGS += -DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS}" -DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS}"
+
+# Disable libssl linking
+DEB_CMAKE_NORMAL_ARGS += -DMD5_SUPPORT=0
+
+# Upgrade Doxyfile, and use SVG graphics
+DEB_COMPRESS_EXCLUDE_DEFAULT += .xhtml
+common-configure-indep:: debian/stamp-doxyupgrade
+debian/stamp-doxyupgrade:
+	[ ! -f /usr/bin/doxygen ] || ( set -e; \
+		cp ${DEB_SRCDIR}/Doxyfile ${DEB_SRCDIR}/Doxyfile.orig; \
+		doxygen -u ${DEB_SRCDIR}/Doxyfile; \
+		perl -i -pe 's/DOT_IMAGE_FORMAT\K.*/=svg/;s/HTML_FILE_EXTENSION\K.*/=.xhtml/' ${DEB_SRCDIR}/Doxyfile; \
+	)
+	touch $@
+clean::
+	[ ! -f ${DEB_SRCDIR}/Doxyfile.orig ] || \
+		cp ${DEB_SRCDIR}/Doxyfile.orig ${DEB_SRCDIR}/Doxyfile
+	rm -f ${DEB_SRCDIR}/Doxyfile.bak
+	rm -f debian/stamp-doxyupgrade
+
+# Build Documentation
+common-build-indep:: debian/stamp-docs
+debian/stamp-docs:
+	[ ! -f /usr/bin/doxygen ] || doxygen ${DEB_SRCDIR}/Doxyfile
+	touch $@
+clean::
+	rm -f debian/stamp-docs
+
+# Let d-shlibs calculate development package dependencies
+#  and handle shared library install
+binary-post-install/$(libpkgname) binary-post-install/$(devpkgname):: debian/stamp-local-shlibs-$(libname)
+debian/stamp-local-shlibs-$(libname): binary-install/$(libpkgname) binary-install/$(devpkgname)
+	d-shlibmove --commit \
+		--v5 \
+		--devunversioned \
+		$(if $(DEB_HOST_MULTIARCH),--multiarch) \
+		--exclude-la \
+		--override s/$(libname)-$(major)-dev/$(libname)-dev/ \
+		--movedev "debian/tmp/usr/include/*" usr/include/ \
+		debian/tmp/usr/lib/$(libname).so
+	touch $@
+clean::
+	rm -f debian/stamp-local-shlibs-$(libname)
+
+# Remove the jquery
+binary-post-install/$(docpkgname)::
+	find debian/$(docpkgname)/usr/share/doc/$(docpkgname)/html/ -name "*.md5" -exec rm -vf {} \;
+

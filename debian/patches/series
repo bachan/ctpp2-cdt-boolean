@@ -1,0 +1,7 @@
+1001_fix-getcwd-error.patch
+1002_fix-manpages.patch
+1003_fix-doxyfile.patch
+1004_ftbfs_fix_kfreebsd-hurd.patch
+1005_ctpp2systypes_h_hurdkfreebsd_fix.patch
+2001_remove-upstream-cflags.patch
+2002_fix-static-libname.patch

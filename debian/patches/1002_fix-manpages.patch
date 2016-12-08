@@ -1,0 +1,78 @@
+Description: Fix the errors in man pages
+ This patch fixes error in man pages like empty new lines and unclosed
+ groff elements used for writing man pages.
+Author: Vasudev Kamath <kamathvasudev@gmail.com>
+Last-Update: 2012-12-18
+Forwarded: no
+
+--- a/man/ctpp2-config.1
++++ b/man/ctpp2-config.1
+@@ -62,7 +62,8 @@
+ .It Fl -includes
+ print list of include dirs
+ .It Fl -includes2
+-print list of include dirs with '-I' prefixes
++print list of include dirs with '\-I' prefixes
++.El
+ .Sh EXIT STATUS
+ .Ex -std
+ .Sh SEE ALSO
+@@ -80,7 +81,7 @@
+ Report bugs to <reki@reki.ru>.
+ .Sh WEBSITE
+ http://ctpp.havoc.ru/en/ - in English
+-
++.br
+ http://ctpp.havoc.ru/    - for Russian speakers
+ .Sh COPYRIGHT
+-Copyright \(co 2004 \- 2010 CTPP Dev. Team.
+\ No newline at end of file
++Copyright \(co 2004 \- 2010 CTPP Dev. Team.
+--- a/man/ctpp2c.1
++++ b/man/ctpp2c.1
+@@ -60,7 +60,7 @@
+ Report bugs to <reki@reki.ru>.
+ .Sh WEBSITE
+ http://ctpp.havoc.ru/en/ - in English
+-
++.br
+ http://ctpp.havoc.ru/    - for Russian speakers
+ .Sh COPYRIGHT
+-Copyright \(co 2004 \- 2010 CTPP Dev. Team.
+\ No newline at end of file
++Copyright \(co 2004 \- 2010 CTPP Dev. Team.
+--- a/man/ctpp2i.1
++++ b/man/ctpp2i.1
+@@ -70,7 +70,7 @@
+ Report bugs to <reki@reki.ru>.
+ .Sh WEBSITE
+ http://ctpp.havoc.ru/en/ - in English
+-
++.br
+ http://ctpp.havoc.ru/    - for Russian speakers
+ .Sh COPYRIGHT
+ Copyright \(co 2004 \- 2010 CTPP Dev. Team.
+--- a/man/ctpp2json.1
++++ b/man/ctpp2json.1
+@@ -56,7 +56,7 @@
+ Report bugs to <reki@reki.ru>.
+ .Sh WEBSITE
+ http://ctpp.havoc.ru/en/ - in English
+-
++.br
+ http://ctpp.havoc.ru/    - for Russian speakers
+ .Sh COPYRIGHT
+-Copyright \(co 2004 \- 2010 CTPP Dev. Team.
+\ No newline at end of file
++Copyright \(co 2004 \- 2010 CTPP Dev. Team.
+--- a/man/ctpp2vm.1
++++ b/man/ctpp2vm.1
+@@ -70,7 +70,7 @@
+ Report bugs to <reki@reki.ru>.
+ .Sh WEBSITE
+ http://ctpp.havoc.ru/en/ - in English
+-
++.br
+ http://ctpp.havoc.ru/    - for Russian speakers
+ .Sh COPYRIGHT
+ Copyright \(co 2004 \- 2010 CTPP Dev. Team.

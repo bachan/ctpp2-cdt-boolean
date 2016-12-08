@@ -1,0 +1,18 @@
+Description: Fix undefined getcwd compiler error
+ This patch includes unistd.h in non Windows platform which defines
+ getcwd function on *NIX platforms.
+Author: Vasudev Kamath <kamathvasudev@gmail.com>
+Last-Update: 2012-12-18
+Forwarded: no
+
+--- a/src/CTPP2FileSourceLoader.cpp
++++ b/src/CTPP2FileSourceLoader.cpp
+@@ -42,6 +42,8 @@
+ #ifdef WIN32
+     #include <direct.h> /* getcwd */
+     #include <windows.h>
++#else
++    #include <unistd.h> /* getcwd */
+ #endif
+ 
+ /**
