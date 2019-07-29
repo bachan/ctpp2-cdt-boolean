@@ -855,7 +855,11 @@ void CDT::PushBack(CCHAR_P oValue)              { PushBack(CDT(oValue)); }
 //
 void CDT::PushBack(const CDT & oValue)
 {
-	if      (eValueType == ARRAY_VAL) { u.p_data -> u.v_data -> push_back(oValue); }
+	if      (eValueType == ARRAY_VAL)
+	{
+		Unshare();
+		u.p_data -> u.v_data -> push_back(oValue);
+	}
 	else if (eValueType == UNDEF)
 	{
 		(*this) = CDT(CDT::ARRAY_VAL);
@@ -4698,6 +4702,7 @@ void CDT::SortArray(const CDT::SortingComparator  & oSortingComparator)
 {
 	if (eValueType != ARRAY_VAL || u.p_data -> u.v_data -> size() <= 1) { return; }
 
+	Unshare();
 	STLW::sort(u.p_data -> u.v_data -> begin(), u.p_data -> u.v_data -> end(), SortHelper(oSortingComparator));
 }
 

@@ -111,8 +111,8 @@ CCharIterator CTPP2JSONParser::IsString(CCharIterator szData, CCharIterator szEn
 							else
 							{
 								iCh |= 0x20;
-								if (*szData >= 'a' && *szData <= 'f') { iTMP += ((iCh - 'a' + 10) << (iI * 4)); }
-								else                                  { throw CTPPParserSyntaxError("invalid unicode escape sequence", szData.GetLine(), szData.GetLinePos()); }
+								if (iCh >= 'a' && iCh <= 'f') { iTMP += ((iCh - 'a' + 10) << (iI * 4)); }
+								else { throw CTPPParserSyntaxError("invalid unicode escape sequence", szData.GetLine(), szData.GetLinePos()); }
 							}
 
 							++szData;
@@ -600,14 +600,14 @@ INT_32 CTPP2JSONParser::Parse(CCharIterator szData, CCharIterator szEnd)
 {
 	// Skip white space
 	szData = IsWhiteSpace(szData, szEnd, 0);
-	// Unexpected EOD?
-	if (szData == szEnd) { throw CTPPParserSyntaxError("empty JSON object", szData.GetLine(), szData.GetLinePos()); }
+	// Empty JSON is valid
+	if (szData == szEnd) return 0;
 
 	// Check object/array/value/special case (bukk, true, false)
 	CCharIterator sTMP = IsValue(szData, szEnd, oCDT);
 	if (sTMP == NULL)
 	{
-		throw CTPPParserSyntaxError("not an JSON object", szData.GetLine(), szData.GetLinePos());
+		throw CTPPParserSyntaxError("not a JSON object", szData.GetLine(), szData.GetLinePos());
 	}
 
 	// Skip white space

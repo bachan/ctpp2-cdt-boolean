@@ -1,3 +1,27 @@
+ctpp2 (2.8.3-19-coccoc+7) unstable; urgency=medium
+
+  * fixed "empty JSON object" exception
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Sat, 05 Jan 2019 11:00:48 +0700
+
+ctpp2 (2.8.3-19-coccoc+6) unstable; urgency=medium
+
+  * fixed "invalid unicode escape sequence" error
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Wed, 07 Nov 2018 16:31:48 +0700
+
+ctpp2 (2.8.3-19-coccoc+5) unstable; urgency=medium
+
+  * fixed build: removed useles dependency
+
+ -- Konstantin Akimov <knst@coccoc.com>  Thu, 07 Dec 2017 16:31:48 +0700
+
+ctpp2 (2.8.3-19-coccoc+4) unstable; urgency=medium
+
+  * fixed CDT copy-on-write
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Mon, 28 Nov 2016 18:49:40 +0700
+
 ctpp2 (2.8.3-19-coccoc+3) unstable; urgency=medium
 
   * support bool values in CDT properly

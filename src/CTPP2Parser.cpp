@@ -740,8 +740,8 @@ CCharIterator CTPP2Parser::IsString(CCharIterator szData, CCharIterator szEnd)
 							else
 							{
 								iCh |= 0x20;
-								if (*szData >= 'a' && *szData <= 'f') { iTMP += ((iCh - 'a' + 10) << (iI * 4)); }
-								else                                  { throw CTPPParserSyntaxError("invalid unicode escape sequence", szData.GetLine(), szData.GetLinePos()); }
+								if (iCh >= 'a' && iCh <= 'f') { iTMP += ((iCh - 'a' + 10) << (iI * 4)); }
+								else { throw CTPPParserSyntaxError("invalid unicode escape sequence", szData.GetLine(), szData.GetLinePos()); }
 							}
 
 							++szData;
